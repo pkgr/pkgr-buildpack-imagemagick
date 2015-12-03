@@ -1,0 +1,22 @@
+#!/bin/bash
+
+set -e
+set -o pipefail
+
+BUILD_DIR=$1
+CACHE_DIR=$2
+
+lib_path=$BUILD_DIR/vendor/pkgr/embed/lib/
+bin_path=$BUILD_DIR/bin/
+mkdir -p $lib_path $bin_path
+
+VENDORED_IMAGEMAGICK="$(mktemp -d)"
+
+curl -L https://s3.amazonaws.com/pkgr-buildpack-ruby/current/sles-11/imagemagick-6.8.9-10.tar.gz -o - | tar xzf - -C  "$VENDORED_IMAGEMAGICK"
+
+cp -R $VENDORED_IMAGEMAGICK/lib/* $lib_path
+cp $VENDORED_IMAGEMAGICK/bin/* $bin_path
+
+echo "export PATH=\"\$HOME/bin:\$PATH\"" > $BUILD_DIR/.profile.d/imagemagick.sh
+echo "export LD_RUN_PATH=\"$lib_path:\$LD_RUN_PATH\"" >> $BUILD_DIR/.profile.d/imagemagick.sh
+echo "export PKG_CONFIG_PATH=\"$lib_path/pkgconfig:$PKG_CONFIG_PATH\" >> $BUILD_DIR/.profile.d/imagemagick.sh
