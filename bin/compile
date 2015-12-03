@@ -5,7 +5,7 @@ set -o pipefail
 
 BUILD_DIR=$1
 CACHE_DIR=$2
-
+mkdir -p $BUILD_DIR/.profile.d
 lib_path=$BUILD_DIR/vendor/pkgr/embed/lib/
 bin_path=$BUILD_DIR/bin/
 mkdir -p $lib_path $bin_path
