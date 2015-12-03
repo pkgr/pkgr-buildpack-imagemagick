@@ -1,6 +1,7 @@
 #!/bin/bash
 
 if [ "$EMBED_IMAGEMAGICK" = "true" ]; then
+	echo "ImageMagick"
 	exit 0
 else
 	exit 1
