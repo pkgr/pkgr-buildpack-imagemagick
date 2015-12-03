@@ -3,8 +3,24 @@
 set -e
 set -o pipefail
 
+export_env_dir() {
+  env_dir=$3
+  whitelist_regex=${2:-''}
+  blacklist_regex=${3:-'^(PATH|GIT_DIR|CPATH|CPPATH|LD_PRELOAD|LIBRARY_PATH)$'}
+  if [ -d "$env_dir" ]; then
+    for e in $(ls $env_dir); do
+      echo "$e" | grep -E "$whitelist_regex" | grep -qvE "$blacklist_regex" &&
+      export "$e=$(cat $env_dir/$e)"
+      :
+    done
+  fi
+}
+
+export_env_dir
+
 BUILD_DIR=$1
 CACHE_DIR=$2
+ENV_DIR=$3
 mkdir -p $BUILD_DIR/.profile.d
 lib_path=$BUILD_DIR/vendor/pkgr/embed/lib/
 bin_path=$BUILD_DIR/bin/
@@ -17,6 +33,7 @@ curl -L https://s3.amazonaws.com/pkgr-buildpack-ruby/current/sles-11/imagemagick
 cp -R $VENDORED_IMAGEMAGICK/lib/* $lib_path
 cp $VENDORED_IMAGEMAGICK/bin/* $bin_path
 
-echo "export PATH=\"\$HOME/bin:\$PATH\"" > $BUILD_DIR/.profile.d/imagemagick.sh
-echo "export LD_RUN_PATH=\"$lib_path:\$LD_RUN_PATH\"" >> $BUILD_DIR/.profile.d/imagemagick.sh
-echo "export PKG_CONFIG_PATH=\"$lib_path/pkgconfig:$PKG_CONFIG_PATH\"" >> $BUILD_DIR/.profile.d/imagemagick.sh
+# echo "export LD_RUN_PATH=\"$lib_path:\$LD_RUN_PATH\"" >> $BUILD_DIR/.profile.d/imagemagick.sh
+cat > $ENV_DIR/PKG_CONFIG_PATH <<CONFIG
+$lib_path/pkgconfig
+CONFIG
