@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -ex
 set -o pipefail
 
 export_env_dir() {
@@ -18,10 +18,11 @@ export_env_dir() {
 
 export_env_dir
 
+BP_DIR="$(dirname "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )")"
 BUILD_DIR=$1
 CACHE_DIR=$2
 ENV_DIR=$3
-mkdir -p $BUILD_DIR/.profile.d
+
 embed_path=$BUILD_DIR/vendor/pkgr/embed
 lib_path=$embed_path/lib
 include_path=$embed_path/include
@@ -37,11 +38,17 @@ cp -R $VENDORED_IMAGEMAGICK/include/* $include_path
 cp $VENDORED_IMAGEMAGICK/bin/* $bin_path
 
 echo "$lib_path/pkgconfig:$PKG_CONFIG_PATH" > $ENV_DIR/PKG_CONFIG_PATH
-echo "$include_path/ImageMagick-6:$C_INCLUDE_PATH" > $ENV_DIR/C_INCLUDE_PATH
+echo "$include_path/ImageMagick-6:$CPATH" > $ENV_DIR/CPATH
 echo "$lib_path:$LIBRARY_PATH" > $ENV_DIR/LIBRARY_PATH
 
 mkdir -p $BUILD_DIR/.profile.d
 cat > $BUILD_DIR/.profile.d/imagemagick.sh <<CONFIG
 export LD_LIBRARY_PATH=/app/vendor/pkgr/embed/lib:\$LD_LIBRARY_PATH
 export PATH=/app/bin:\$PATH
+CONFIG
+
+cat > $BP_DIR/export <<CONFIG
+export PKG_CONFIG_PATH=$lib_path/pkgconfig:\$PKG_CONFIG_PATH
+export CPATH=$include_path/ImageMagick-6:\$CPATH
+export LIBRARY_PATH=$lib_path:\$LIBRARY_PATH
 CONFIG
