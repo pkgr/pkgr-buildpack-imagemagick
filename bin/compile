@@ -51,4 +51,5 @@ cat > $BP_DIR/export <<CONFIG
 export PKG_CONFIG_PATH=$lib_path/pkgconfig:\$PKG_CONFIG_PATH
 export CPATH=$include_path/ImageMagick-6:\$CPATH
 export LIBRARY_PATH=$lib_path:\$LIBRARY_PATH
+export LD_LIBRARY_PATH=$lib_path:\$LD_LIBRARY_PATH
 CONFIG
