@@ -22,8 +22,9 @@ BUILD_DIR=$1
 CACHE_DIR=$2
 ENV_DIR=$3
 mkdir -p $BUILD_DIR/.profile.d
-lib_path=$BUILD_DIR/vendor/pkgr/embed/lib/
-bin_path=$BUILD_DIR/bin/
+embed_path=$BUILD_DIR/vendor/pkgr/embed
+lib_path=$embed_path/lib
+bin_path=$BUILD_DIR/bin
 mkdir -p $lib_path $bin_path
 
 VENDORED_IMAGEMAGICK="$(mktemp -d)"
@@ -33,7 +34,6 @@ curl -L https://s3.amazonaws.com/pkgr-buildpack-ruby/current/sles-11/imagemagick
 cp -R $VENDORED_IMAGEMAGICK/lib/* $lib_path
 cp $VENDORED_IMAGEMAGICK/bin/* $bin_path
 
-# echo "export LD_RUN_PATH=\"$lib_path:\$LD_RUN_PATH\"" >> $BUILD_DIR/.profile.d/imagemagick.sh
-cat > $ENV_DIR/PKG_CONFIG_PATH <<CONFIG
-$lib_path/pkgconfig
-CONFIG
+echo "$lib_path/pkgconfig:$PKG_CONFIG_PATH" > $ENV_DIR/PKG_CONFIG_PATH
+echo "$embed_path/include/ImageMagick-6:$C_INCLUDE_PATH" > $ENV_DIR/C_INCLUDE_PATH
+echo "$lib_path:$LIBRARY_PATH" > $ENV_DIR/LIBRARY_PATH
